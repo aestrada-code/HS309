@@ -161,6 +161,22 @@ footer {
   main { padding: 18px 10px; }
   .section-heading h2 { font-size: 20px; }
 }
+  
+  .hazcard-link {
+  color: #285b8f;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.hazcard-link:hover {
+  color: #17365d;
+}
+
+.hazcard-link:focus {
+  outline: 2px solid #285b8f;
+  outline-offset: 3px;
+}
 </style>
 </head>
 
@@ -508,6 +524,27 @@ function matches(item, query, cabinet, subcategory) {
     && (!subcategory || item.sub === subcategory);
 }
 
+  function renderHazcard(label) {
+  const value = String(label || "").trim();
+
+  // Do not create links for missing or unverified references.
+  if (!/^\d+[A-Za-z]?$/.test(value)) {
+    return escapeHTML(value || "Not provided");
+  }
+
+  const anchor = value.toLowerCase();
+  const url =
+    `https://aestrada-code.github.io/Hazcards.-References/#card-${anchor}`;
+
+  return `<a class="hazcard-link"
+            href="${url}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open HazCard ${escapeHTML(value)}">
+            ${escapeHTML(value)}
+          </a>`;
+}
+  
 function renderChemicals(chemicals) {
   if (!chemicals || !chemicals.length) {
     return '<span>—</span>';
@@ -523,7 +560,7 @@ function renderChemicals(chemicals) {
             <div class="compound">
               <div class="compound-name">${escapeHTML(c[0])}</div>
               <div><strong>Formula:</strong> ${escapeHTML(c[1] || "Not provided")}</div>
-              <div><strong>HazCards Label:</strong> ${escapeHTML(c[2] || "Not provided")}</div>
+              <div><strong>HazCards Label:</strong> ${renderHazcard(c[2])}</div>
               <div class="hazard ${unverified ? "unverified" : ""}">
                 <strong>Hazards:</strong> ${escapeHTML(c[3] || "Not provided")}
               </div>
