@@ -1,0 +1,620 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry Inventory | HS 309</title>
+
+<style>
+:root {
+  --navy: #17365d;
+  --blue: #285b8f;
+  --background: #f4f6fa;
+  --border: #dce3ec;
+  --text: #263447;
+  --muted: #66758a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+header {
+  background: var(--navy);
+  color: white;
+  padding: 32px 24px;
+}
+.header-inner, main {
+  max-width: 1400px;
+  margin: auto;
+}
+header h1 { margin: 0 0 10px; font-size: 30px; }
+header p { margin: 5px 0; line-height: 1.6; color: #e0e9f4; }
+main { padding: 24px 18px 40px; }
+.toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: white;
+  font-size: 14px;
+}
+.navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+}
+.navigation a {
+  text-decoration: none;
+  background: white;
+  color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 15px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.navigation a:hover { background: #e7eef8; }
+.category-section { margin-top: 34px; }
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.section-heading h2 { margin: 0; font-size: 23px; color: var(--navy); }
+.section-heading span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.table-wrap {
+  overflow-x: auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 950px;
+  font-size: 13px;
+}
+thead { background: #eaf0f7; }
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border-bottom: 1px solid #e8edf3;
+  line-height: 1.55;
+}
+th { color: var(--navy); font-weight: 700; }
+tbody tr:hover { background: #f8fafc; }
+.item-name { font-weight: 700; color: var(--navy); }
+.tag {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #eaf0f8;
+  color: #254c79;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.compound-list { min-width: 280px; }
+.compound {
+  padding: 10px;
+  margin-bottom: 9px;
+  background: #f8fafc;
+  border-left: 3px solid #b7c8dc;
+  border-radius: 3px;
+}
+.compound:last-child { margin-bottom: 0; }
+.compound-name { font-weight: 700; margin-bottom: 4px; }
+.hazard {
+  margin-top: 6px;
+  padding: 7px;
+  border-radius: 4px;
+  background: #fff3e6;
+  color: #784219;
+}
+.unverified {
+  background: #fff8dc;
+  color: #735a15;
+}
+details summary {
+  cursor: pointer;
+  color: var(--blue);
+  font-weight: 600;
+}
+details { margin-top: 6px; }
+.empty {
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+}
+.status {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 14px 0;
+}
+footer {
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+@media(max-width: 700px) {
+  .toolbar { grid-template-columns: 1fr; }
+  header h1 { font-size: 24px; }
+  main { padding: 18px 10px; }
+  .section-heading h2 { font-size: 20px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="header-inner">
+    <p>SCIENCE DEPARTMENT · LABORATORY RESOURCES</p>
+    <h1>Chemistry Inventory</h1>
+    <p>Room HS 309</p>
+    <p>Search and browse chemistry kits, educational supplies, laboratory equipment and Vernier instruments.</p>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <input id="search" type="search"
+      placeholder="Search materials, compounds, formulas, HazCards..."
+      aria-label="Search the inventory">
+
+    <select id="cabinet" aria-label="Filter by cabinet">
+      <option value="">All cabinets / locations</option>
+    </select>
+
+    <select id="subcategory" aria-label="Filter by subcategory">
+      <option value="">All subcategories</option>
+      <option value="Kit">Kit</option>
+      <option value="Supplies">Supplies</option>
+      <option value="Equipment">Equipment</option>
+      <option value="VERNIER">VERNIER</option>
+    </select>
+  </div>
+
+  <nav class="navigation" aria-label="Inventory categories">
+    <a href="#kits">Kits</a>
+    <a href="#supplies">Supplies</a>
+    <a href="#equipment">Equipment</a>
+    <a href="#vernier">Vernier</a>
+  </nav>
+
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <section id="kits" class="category-section">
+    <div class="section-heading">
+      <h2>Kits</h2><span>Experimental kits and demonstrations</span>
+    </div>
+    <div id="kits-table"></div>
+  </section>
+
+  <section id="supplies" class="category-section">
+    <div class="section-heading">
+      <h2>Supplies</h2><span>Educational and laboratory materials</span>
+    </div>
+    <div id="supplies-table"></div>
+  </section>
+
+  <section id="equipment" class="category-section">
+    <div class="section-heading">
+      <h2>Equipment</h2><span>Laboratory apparatus and replacement parts</span>
+    </div>
+    <div id="equipment-table"></div>
+  </section>
+
+  <section id="vernier" class="category-section">
+    <div class="section-heading">
+      <h2>Vernier</h2><span>Sensors, probes and measuring instruments</span>
+    </div>
+    <div id="vernier-table"></div>
+  </section>
+</main>
+
+<footer>
+  Chemistry Room · HS 309 · Science Department
+  <br>
+  Chemical hazard descriptions are inventory reference information, not a substitute
+  for the current supplier Safety Data Sheet (SDS).
+  Verify the compound, formulation and concentration before laboratory use.
+</footer>
+
+<script>
+/*
+  INVENTORY DATA
+  Fields:
+  id = cabinet or location label
+  name = item / kit name
+  stock = recorded quantity
+  sub = subcategory
+  room = recorded room or location
+  chemicals = chemicals associated with a kit
+*/
+
+const inventory = [
+  // ==================== KITS ====================
+  {id:"A",name:"Snatoms Kit Model",stock:"1 box",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Bright Atom Models",stock:"7 boxes",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Transition Metal Complex Ion Shapes Set",stock:"1 box",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Molecular Model Set for Organic Chemistry",stock:"1 box",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Organic & Inorganic Chemistry Student Models",stock:"7 boxes",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Chemical Equation Balancing Model",stock:"2 boxes",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Atom Building Game",stock:"1 box",sub:"Kit",room:"HS 309"},
+  {id:"A",name:"Organic & Inorganic Chemistry Teacher Models",stock:"2 boxes",sub:"Kit",room:"HS 309"},
+
+  {id:"B",name:"ChemKits Gas Laws",stock:"5 boxes",sub:"Kit",room:"HS 309"},
+
+  {id:"B",name:"Balloon Stoichiometry Kit",stock:"2 bags",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Hydrochloric Acid, 1 M (Stock Room)","HCl","47A","Corrosive: can cause severe skin burns and serious eye damage; may irritate the respiratory system. Verify the applicable concentration-specific SDS."],
+    ["Bromophenol Blue","C₁₉H₁₂Br₂O₅S","Not verified","No hazard description could be confirmed from the supplied reference."]
+   ]},
+
+  {id:"B",name:"Endothermic Reaction Beaker Freezer",stock:"3 bags",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Barium Hydroxide Octahydrate","Ba(OH)₂·8H₂O","10B","Harmful if swallowed or inhaled; causes severe skin burns and serious eye damage."],
+    ["Ammonium Chloride","NH₄Cl","9A","Harmful if swallowed and causes serious eye irritation."]
+   ]},
+
+  {id:"B",name:"ChemKit Mystery Chemical Reaction Kits",stock:"3 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Lead Nitrate, 0.1 M","Pb(NO₃)₂","Not verified","Hazard description not verified in the supplied reference. Consult the current SDS. Lead-containing waste requires appropriate hazardous-waste handling."],
+    ["Potassium Iodide, 0.1 M","KI","47B","Some suppliers classify iodides as causing skin and serious eye irritation. Check the formulation-specific SDS."],
+    ["Sodium Hydroxide, 0.1 M","NaOH","91A","The supplied reference recommends treating this solution as an irritant to skin and eyes."],
+    ["Sodium Phosphate, 0.1 M","Na₃PO₄*","72","The supplied reference describes possible skin and serious eye irritation. Verify the exact phosphate compound."],
+    ["Copper(II) Sulfate, 0.1 M","CuSO₄","27C","Check the concentration-specific SDS. Copper-containing waste must be handled according to laboratory procedures."],
+    ["Sodium Chloride, 0.1 M","NaCl","47B","No specific hazardous classification was listed in the supplied reference."],
+    ["Calcium Chloride, 0.1 M","CaCl₂","19A","May irritate skin and eyes. Verify the solution-specific SDS."],
+    ["Calcium Carbonate, 0.1 M","CaCO₃","19B","The supplied reference does not classify this substance as hazardous."]
+   ]},
+
+  {id:"B",name:"Elements, Compounds & Mixtures 2",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Copper Carbonate","CuCO₃","26","Harmful if swallowed and causes skin irritation."],
+    ["Copper(II) Sulfate","CuSO₄","27C","Harmful if swallowed; irritates skin; causes serious eye damage; very toxic to aquatic life with long-lasting effects."],
+    ["Sodium Bicarbonate","NaHCO₃","Not verified","No hazard description could be confirmed from the supplied reference."],
+    ["Sodium Chloride","NaCl","47B","No specific hazardous classification was listed in the supplied reference."],
+    ["Calcium Chloride Solution","CaCl₂","19A","Concentrated solutions can irritate skin and eyes; exact hazard depends on concentration."],
+    ["Sodium Carbonate","Na₂CO₃","95A","Causes serious eye irritation."],
+    ["Sulfur Powder (Shelf 2)","S","96A","Causes skin irritation. Some suppliers also classify sulfur as a flammable solid."]
+   ]},
+
+  {id:"B",name:"Rate of Reaction: Luminol",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Hydrogen Peroxide","H₂O₂","50","Concentrated solutions can cause serious eye damage; lower concentrations can cause serious eye irritation."],
+    ["Sodium Hydroxide","NaOH","91A","Causes severe skin burns and serious eye damage."]
+   ]},
+
+  {id:"B",name:"ChemStration Metal Activity Series",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Silver Nitrate, 0.1 M","AgNO₃","87","The solid can cause severe skin burns and serious eye damage and can intensify fire. Verify the solution-specific SDS."],
+    ["Copper(II) Sulfate, 0.1 M","CuSO₄","27C","At 0.1 M, the supplied reference places the solution below its stated 0.2 M irritation threshold."],
+    ["Iron(II) Sulfate, 0.1 M","FeSO₄","55B","The solid is harmful if swallowed and causes skin and serious eye irritation. Check the solution-specific classification."]
+   ]},
+
+  {id:"E",name:"Petri Dish Electrolysis",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Sodium Sulfate","Na₂SO₄","98B","Currently not classified as hazardous in the supplied reference."],
+    ["Potato Starch","(C₆H₁₀O₅)ₙ","Not verified","No hazard description could be confirmed from the supplied reference."],
+    ["Potassium Iodide","KI","47B","Some suppliers classify iodides as causing skin and serious eye irritation. Check the SDS."],
+    ["Phenolphthalein","C₂₀H₁₂O₄","Not verified","No hazard description could be confirmed from the supplied reference."]
+   ]},
+
+  {id:"E",name:"ChemStration Water Electrolysis",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Sodium Sulfate","Na₂SO₄","98B","Currently not classified as hazardous in the supplied reference."],
+    ["Bogen Universal Indicator","Mixture","Not verified","Mixture; verify the product label and supplier SDS."]
+   ]},
+
+  {id:"C",name:"Electrochemistry Kit",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Potassium Nitrate, 1 M","KNO₃","82","Oxidising. Check the SDS for the concentration-specific irritation classification."],
+    ["Lead Nitrate, 1 M","Pb(NO₃)₂","Not verified","Hazard description not verified in the supplied reference. Consult the current SDS."],
+    ["Aluminum Nitrate, 1 M","Al(NO₃)₃","2B","Oxidising; causes skin irritation and serious eye irritation."],
+    ["Copper(II) Nitrate, 1 M","Cu(NO₃)₂","27B","Harmful if swallowed; causes skin irritation and serious eye damage. Check the concentration-specific SDS."],
+    ["Nickel(II) Nitrate, 1 M","Ni(NO₃)₂","65B","Oxidising; harmful if swallowed or inhaled. May cause allergic reactions, genetic defects and organ damage after prolonged or repeated exposure."],
+    ["Zinc Nitrate, 1 M","Zn(NO₃)₂","108A","Oxidising; harmful if swallowed; causes skin irritation and serious eye irritation."],
+    ["Sodium Iodide, 0.1 M","NaI","47B","Some suppliers classify iodides as causing skin and serious eye irritation. Check the SDS."],
+    ["Sodium Sulfate, 0.1 M","Na₂SO₄","98B","Currently not classified as hazardous in the supplied reference."],
+    ["Copper(II) Sulfate, 0.1 M","CuSO₄","27C","Check the concentration-specific SDS. Copper-containing waste requires appropriate disposal."],
+    ["Sodium Chloride, 0.1 M","NaCl","47B","No specific hazardous classification was listed in the supplied reference."],
+    ["Lead Nitrate, 0.1 M","Pb(NO₃)₂","Not verified","Hazard description not verified in the supplied reference. Consult the current SDS."],
+    ["Universal Indicator","Mixture","Not verified","Mixture; verify the product label and supplier SDS."]
+   ]},
+
+  {id:"C",name:"ChemKits Bonding Kit",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Sodium Carbonate","Na₂CO₃","95A","Causes serious eye irritation."],
+    ["Citric Acid","C₆H₈O₇","36C","Can cause serious eye irritation and may irritate the respiratory system, depending on concentration."],
+    ["Calcium Chloride","CaCl₂","19A","Can cause skin and serious eye irritation; may irritate the respiratory system."],
+    ["Sodium Sulfate","Na₂SO₄","98B","Currently not classified as hazardous in the supplied reference."],
+    ["Sodium Chloride","NaCl","47B","No specific hazardous classification was listed in the supplied reference."],
+    ["Stearic Acid","C₁₈H₃₆O₂","38B","The supplied reference lists higher fatty acids as currently not classified as hazardous."],
+    ["Benzoic Acid","C₇H₆O₂","13A","Causes skin irritation and serious eye damage; prolonged or repeated inhalation may damage the lungs."],
+    ["Magnesium Chloride","MgCl₂","59B","The supplied reference describes this entry as currently not classified as hazardous."],
+    ["Potassium Chloride","KCl","47B","No specific hazardous classification was listed in the supplied reference."],
+    ["Glucose","C₆H₁₂O₆","40C","Currently not classified as hazardous in the supplied reference."],
+    ["Sucrose","C₁₂H₂₂O₁₁","40C","Currently not classified as hazardous in the supplied reference."]
+   ]},
+
+  {id:"C",name:"Introduction to Stoichiometry",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Anhydrous Sodium Carbonate","Na₂CO₃","95A","Causes serious eye irritation."]
+   ]},
+
+  {id:"C",name:"Shampoo Chemistry Lab",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Shampoo Samples","Mixture","Not verified","Commercial mixture; hazards depend on the exact product formulation."]
+   ]},
+
+  {id:"C",name:"A Closer Look at Polymers",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Polyvinyl Alcohol (PVA)","(C₂H₄O)ₙ","Not verified","Hazard classification not verified in the supplied reference."]
+   ]},
+
+  {id:"C",name:"Chemistry Magic",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Methylene Blue Stain","C₁₆H₁₈ClN₃S","Not verified","Hazards depend on the stain formulation. Check the supplier SDS."],
+    ["Potassium Hydroxide","KOH","91B","Causes severe skin burns and serious eye damage; harmful if swallowed."],
+    ["Glucose","C₆H₁₂O₆","40C","Currently not classified as hazardous in the supplied reference."]
+   ]},
+
+  {id:"C",name:"Chemiluminescence Demo Kit",stock:"2 boxes",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Luminol Activator","Mixture / verify","4B","Preliminary reference only. Verify the actual formulation and supplier SDS."],
+    ["Reagent A","Verify","Not verified","Name is insufficient to identify composition or hazard."]
+   ]},
+
+  {id:"E",name:"Instant Light Powder Chemiluminescence Demo",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Instant Light Powder","Composition not provided","Not verified","The product name alone is insufficient to identify the composition or hazards. Check the product SDS."]
+   ]},
+
+  {id:"B",name:"Bright Demo with Glow Sticks Kit",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Sodium Hydroxide, 0.1 M","NaOH","91A","The supplied reference treats this concentration as an irritant to skin and eyes."],
+    ["Hydrochloric Acid (Stock Room)","HCl","47A","Hazard depends on concentration. Consult the current stock-room SDS."],
+    ["Sodium Salicylate","C₇H₅NaO₃","Not verified","No hazard description could be confirmed from the supplied reference."],
+    ["Potassium Permanganate","KMnO₄","81","Oxidising; harmful if swallowed; very toxic to aquatic life with long-lasting effects."]
+   ]},
+
+  {id:"B",name:"Factors Affecting Reaction Rates AP Kit",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Hydrochloric Acid (Stock Room)","HCl","47A","Hazard depends on concentration. Consult the current stock-room SDS."],
+    ["Alka-Seltzer","Mixture","Not verified","Commercial mixture; check the exact product formulation."],
+    ["Potassium Iodate","KIO₃","80","Classification varies by supplier. Check the current SDS."],
+    ["Starch Solution","(C₆H₁₀O₅)ₙ","Not verified","No specific hazard description confirmed for this solution formulation."],
+    ["Sodium Metabisulfite","Na₂S₂O₅","92","Harmful if swallowed and causes serious eye damage. Contact with acids or heat can release sulfur dioxide."]
+   ]},
+
+  {id:"E",name:"Fluorescent Slime: Polyvinyl Alcohol",stock:"3 sets",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Polyvinyl Alcohol (PVA) (Stock Room)","(C₂H₄O)ₙ","Not verified","Hazard classification not stated in the supplied reference."]
+   ]},
+
+  {id:"E",name:"Energy Transformations with Irradiated Salt",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Irradiated Lithium Chloride","LiCl","47B","Lithium chloride is harmful if swallowed and causes skin and serious eye irritation. Irradiation requires separate radiation-safety documentation."],
+    ["Irradiated Sodium Chloride","NaCl","47B","The supplied reference gives no specific chemical hazard classification. Radiation-related risks require separate documentation."]
+   ]},
+
+  {id:"E",name:"Aspirin Synthesis",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Acetic Acid","C₂H₄O₂","38A","Concentrated acid is flammable and can cause severe skin burns and serious eye damage. Hazard depends on concentration."],
+    ["Ethanol","C₂H₆O","40A","Highly flammable liquid and vapour. Consult the formulation-specific SDS."]
+   ]},
+
+  {id:"B",name:"Nylon Synthesis",stock:"1 box",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Sebacoyl Chloride","C₁₀H₁₆Cl₂O₂","41","Causes severe skin burns and serious eye damage."],
+    ["1,6-Hexanediamine Solution","C₆H₁₆N₂","3B","Harmful if swallowed and may cause respiratory irritation. Classification depends on concentration."]
+   ]},
+
+  {id:"E",name:"Fractional Distillation Kit",stock:"2 sets",sub:"Kit",room:"HS 309",
+   chemicals:[
+    ["Synthetic Crude Oil (Stock Room – Flammable)","Not provided","Not verified","Synthetic hydrocarbon mixture. The inventory identifies it as flammable; consult its SDS for composition and hazards."]
+   ]},
+
+  {id:"E",name:"Chemical Reaction Rockets",stock:"1 bag",sub:"Kit",room:"HS 309"},
+  {id:"Shelf 1 - Prep Lab",name:"Polyurethane Foam Kit",stock:"2 boxes",sub:"Kit",room:"Shelf 1 - Prep Lab",
+   chemicals:[
+    ["Polyurethane (Shelf 1 - Kits)","Not provided","Not verified","Check the kit documentation and SDS for the specific formulation."]
+   ]},
+
+  // ==================== SUPPLIES ====================
+  {id:"A",name:"Element Cards",stock:"1 box",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Chemical Nomenclature Cards",stock:"1 box",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Chemistry Bingo",stock:"1 bag",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Science Smart Bingo",stock:"2 bags",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Chemical Reactions Learning Guide",stock:"3 sets",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Game-Based Learning Systems",stock:"2 sets",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Periodic Table Inquiry with Cards",stock:"5 sets",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Periodic Table Game",stock:"1 box",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"Keep Looking Game Board (CAROLINA)",stock:"5 sets",sub:"Supplies",room:"HS 309"},
+  {id:"A",name:"The Atoms (Board Game)",stock:"3 u",sub:"Supplies",room:"HS 309"},
+  {id:"E",name:"Students cells set",stock:"Not recorded",sub:"Supplies",room:"HS 309"},
+
+  // ==================== EQUIPMENT ====================
+  {id:"D",name:"Microscope Replacement Parts",stock:"2 boxes",sub:"Equipment",room:"HS 309"},
+  {id:"D",name:"Replacement Eyepieces",stock:"1 box",sub:"Equipment",room:"HS 309"},
+  {id:"E",name:"Bunsen Burners",stock:"Few",sub:"Equipment",room:"HS 309"},
+  {id:"E",name:"Gas Hoses (Large & Small)",stock:"Few",sub:"Equipment",room:"HS 309"},
+  {id:"E",name:"Electrolysis device",stock:"2 boxes",sub:"Equipment",room:"HS 309"},
+
+  // ==================== VERNIER ====================
+  {id:"O",name:"Colorimeter",stock:"9 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Conductivity Probe",stock:"5 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Drop Counter",stock:"10 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Gas Pressure sensor",stock:"Not recorded",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Go Direct Chemical Polarimeter",stock:"1 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Go Direct Colorimeter",stock:"1 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Go Direct Gas Pressure sensor",stock:"Not recorded",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Go direct Spectrovis Plus",stock:"2 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Go Temp. Probe",stock:"2 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Infrared thermometer",stock:"1 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"ORP Sensor",stock:"6 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"pH Sensor",stock:"2 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Spectrovis Plus",stock:"1 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Stainless Steel Temp. Probe",stock:"8 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"Tris-Compatible Flat pH Sensor",stock:"10 u",sub:"VERNIER",room:"HS 309"},
+  {id:"O",name:"UV-vis Spectrophotometer",stock:"1 u",sub:"VERNIER",room:"HS 309"}
+];
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[char]);
+}
+
+function compoundMatches(compound, query) {
+  return [
+    compound[0], compound[1], compound[2], compound[3]
+  ].join(" ").toLowerCase().includes(query);
+}
+
+function matches(item, query, cabinet, subcategory) {
+  const mainMatches = [
+    item.id, item.name, item.stock, item.sub, item.room
+  ].join(" ").toLowerCase().includes(query);
+
+  const chemicalMatches = (item.chemicals || [])
+    .some(c => compoundMatches(c, query));
+
+  return (!query || mainMatches || chemicalMatches)
+    && (!cabinet || item.id === cabinet)
+    && (!subcategory || item.sub === subcategory);
+}
+
+function renderChemicals(chemicals) {
+  if (!chemicals || !chemicals.length) {
+    return '<span>—</span>';
+  }
+
+  return `
+    <details>
+      <summary>View ${chemicals.length} associated compound(s)</summary>
+      <div class="compound-list">
+        ${chemicals.map(c => {
+          const unverified = /not verified|verify/i.test(c[2]);
+          return `
+            <div class="compound">
+              <div class="compound-name">${escapeHTML(c[0])}</div>
+              <div><strong>Formula:</strong> ${escapeHTML(c[1] || "Not provided")}</div>
+              <div><strong>HazCards Label:</strong> ${escapeHTML(c[2] || "Not provided")}</div>
+              <div class="hazard ${unverified ? "unverified" : ""}">
+                <strong>Hazards:</strong> ${escapeHTML(c[3] || "Not provided")}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </details>
+  `;
+}
+
+function renderCategory(sub, targetId, query, cabinet, subcategory) {
+  const data = inventory.filter(item =>
+    item.sub === sub && matches(item, query, cabinet, subcategory)
+  );
+
+  const target = $(targetId);
+
+  if (!data.length) {
+    target.innerHTML = '<div class="empty">No matching items found.</div>';
+    return 0;
+  }
+
+  target.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID / Label</th>
+            <th>Supplies Name</th>
+            <th>In Stock</th>
+            <th>Subcategory</th>
+            <th>Room / Location</th>
+            <th>Chemicals & Safety Information</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(item => `
+            <tr>
+              <td>${escapeHTML(item.id || "—")}</td>
+              <td class="item-name">${escapeHTML(item.name)}</td>
+              <td>${escapeHTML(item.stock || "Not recorded")}</td>
+              <td><span class="tag">${escapeHTML(item.sub)}</span></td>
+              <td>${escapeHTML(item.room || "Not recorded")}</td>
+              <td>${renderChemicals(item.chemicals)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return data.length;
+}
+
+function populateCabinets() {
+  const select = $("cabinet");
+  const previous = select.value;
+  const labels = [...new Set(inventory.map(i => i.id))]
+    .sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+
+  select.innerHTML =
+    '<option value="">All cabinets / locations</option>' +
+    labels.map(label =>
+      `<option value="${escapeHTML(label)}">${escapeHTML(label)}</option>`
+    ).join("");
+
+  if (labels.includes(previous)) select.value = previous;
+}
+
+function renderInventory() {
+  const query = $("search").value.trim().toLowerCase();
+  const cabinet = $("cabinet").value;
+  const subcategory = $("subcategory").value;
+
+  const kits = renderCategory("Kit","kits-table",query,cabinet,subcategory);
+  const supplies = renderCategory("Supplies","supplies-table",query,cabinet,subcategory);
+  const equipment = renderCategory("Equipment","equipment-table",query,cabinet,subcategory);
+  const vernier = renderCategory("VERNIER","vernier-table",query,cabinet,subcategory);
+
+  const total = kits + supplies + equipment + vernier;
+  $("status").textContent =
+    `Showing ${total} of ${inventory.length} inventory items.`;
+}
+
+populateCabinets();
+$("search").addEventListener("input",renderInventory);
+$("cabinet").addEventListener("change",renderInventory);
+$("subcategory").addEventListener("change",renderInventory);
+
+renderInventory();
+</script>
+</body>
+</html>
